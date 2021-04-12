@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
-import { createDetachedSignature, createHash } from 'crypto-pro';
+import { createDetachedSignature, createHash, getUserCertificates } from 'crypto-pro';
 
 import logo from './logo.svg';
 import './App.css';
 
 function App() {
 
-  const signIt = async () => {
-    const message = 'Hello Workld';
+  const signIt = async (source) => {
+    const message = source ? source : 'Hello Workld';
     try {
       const messageHash = await createHash(message);
 
@@ -22,22 +22,35 @@ function App() {
     }
   };
 
+  const onSelectFile = (event) => {
+    event.preventDefault();
+
+    const file = event.target.files[0];
+
+    const fileReader = new FileReader();
+
+    fileReader.onload = () => {
+      console.log('file has been readed');
+      signIt(fileReader.result);
+    };
+
+    fileReader.onerror = (error) => {
+      console.error(error);
+    };
+
+    fileReader.readAsDataURL(file);
+    // getUserCertificates();
+  };
+
   return (
     <div className="App">
-      <header className="App-header" onClick={signIt}>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className='string-signer' onClick={signIt} style={{ marginBottom: '20px' }}>
+        Create Sign for string
+      </div>
+
+      <div className='sign-file'>
+        <input type='file' accept='.pdf' onChange={onSelectFile} />
+      </div>
     </div>
   );
 }
