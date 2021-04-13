@@ -6,13 +6,13 @@ import './App.css';
 
 function App() {
 
-  const signIt = async (source) => {
+  const signIt = async (source, thumbprint) => {
     const message = source ? source : 'Hello Workld';
     try {
       const messageHash = await createHash(new Uint8Array(message));
 
       try {
-        const signature = await createAttachedSignature('certname', messageHash);
+        const signature = await createAttachedSignature(thumbprint, messageHash);
         console.log(signature);
       } catch (signatureError) {
         console.log(signatureError);
@@ -29,9 +29,20 @@ function App() {
 
     const fileReader = new FileReader();
 
-    fileReader.onload = () => {
+    fileReader.onload = async () => {
       console.log('file has been readed');
-      signIt(fileReader.result);
+      try {
+        const certs = await getUserCertificates();
+        console.log(certs[0]);
+
+        if (certs.length) {
+          signIt(fileReader.result, certs[0].thumbprint);
+        } else {
+          console.log('Certs not found');
+        }
+      } catch(certsListError) {
+        console.log('Error on getting certs list');
+      };
     };
 
     fileReader.onerror = (error) => {
@@ -39,7 +50,6 @@ function App() {
     };
 
     fileReader.readAsDataURL(file);
-    // getUserCertificates();
   };
 
   return (
