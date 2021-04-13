@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { createDetachedSignature, createHash, getUserCertificates } from 'crypto-pro';
+import { createAttachedSignature, createHash, getUserCertificates } from 'crypto-pro';
 
 import logo from './logo.svg';
 import './App.css';
@@ -9,10 +9,10 @@ function App() {
   const signIt = async (source) => {
     const message = source ? source : 'Hello Workld';
     try {
-      const messageHash = await createHash(message);
+      const messageHash = await createHash(new Uint8Array(message));
 
       try {
-        const signature = await createDetachedSignature('certname', messageHash);
+        const signature = await createAttachedSignature('certname', messageHash);
         console.log(signature);
       } catch (signatureError) {
         console.log(signatureError);
